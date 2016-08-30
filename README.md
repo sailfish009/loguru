@@ -73,6 +73,17 @@ In particular, I want logging that produces logs that are both human-readable an
 
 ## Compiling
 
+loguru is a good library for my purpose, i just need simple printf-like log function.
+
+original version single header file [loguru.hpp], i tried it with my simple mfc program.
+but it didn't worked, so i split it to loguru.cpp and loguru.h and built it to Log.lib
+
+1. create win32 project
+2. build it as static library
+3. link it with simple win32 program.
+
+original setting:
+
 Just include <loguru.hpp> where you want to use Loguru.
 Then, in one .cpp file:
 ``` C++
