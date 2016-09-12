@@ -135,6 +135,12 @@ loguru::set_fatal_handler([](const loguru::Message& message){
 });
 ```
 
+``` C
+LOG_INFO("I'm hungry for some %.3f!", 3.14159);
+LOG_ERROR("function() return %d\n", -1); 
+```
+
+
 If you prefer logging with streams:
 
 ``` C++
