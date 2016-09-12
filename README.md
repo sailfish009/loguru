@@ -1,4 +1,4 @@
-# Loguru: a header-only C++ logging library.
+# Loguru: a C++ logging library.
 
 ## At a glance
 
@@ -16,8 +16,6 @@ I have yet to come across a nice, light-weight logging library for C++ that does
 In particular, I want logging that produces logs that are both human-readable and easily grep:ed. I also want to be able to hook into the logging process to print some of the more severe messages on-screen in my app (for dev-purposes).
 
 ## Features:
-* Header only
-	* No linking woes! Just include and enjoy.
 * Small, simple library.
 	* Small header with no `#include`s for **fast compile times** (see separate heading).
 	* No dependencies.
