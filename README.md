@@ -88,7 +88,8 @@ Just include <loguru.hpp> where you want to use Loguru.
 Then, in one .cpp file:
 ``` C++
 	#define LOGURU_IMPLEMENTATION
-	#include <loguru.hpp>
+	#include <loguru.h>
+	#pragma comment(lib, "Log.lib")
 ```
 Make sure you compile with `-std=c++11 -lpthread -ldl`
 
