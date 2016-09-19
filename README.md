@@ -210,12 +210,6 @@ date       time         ( uptime  ) [ thread name/id ]                   file:li
 2015-10-04 15:28:30.815 (   0.267s) [main thread     ]        loguru_test.cpp:108      0| } 0.267 s: int main_test(int, char **)
 ```
 
-Which looks like this in the terminal:
-
-![Terminal colors](images/terminal_colors.png)
-
-(Notice how verbosity levels higher than 0 are slightly gray).
-
 Scopes affects logging on all threads.
 
 
