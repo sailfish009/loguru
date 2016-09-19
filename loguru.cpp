@@ -142,7 +142,7 @@ namespace loguru
 
 	static const bool s_terminal_has_color = []() {
 #ifdef _MSC_VER
-		return false;
+    return true; // false;
 #else
 		if (const char* term = getenv("TERM")) {
 			return 0 == strcmp(term, "cygwin")
@@ -173,28 +173,52 @@ namespace loguru
 
 	// ------------------------------------------------------------------------------
 	// Colors
+#if _MSC_VER
+#include "Windows.h"
+  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
+  // Colors
+  const char* terminal_black() { return ""; }
+  const char* terminal_red() { return ""; }
+  const char* terminal_green() { return ""; }
+  const char* terminal_yellow() { return ""; }
+  const char* terminal_blue() { return ""; }
+  const char* terminal_purple() { return ""; }
+  const char* terminal_cyan() { return ""; }
+  const char* terminal_light_gray() { return ""; }
+  const char* terminal_white() { return ""; }
+  const char* terminal_light_red() { return ""; }
+  const char* terminal_dim() { return ""; }
+
+  // Formating
+  const char* terminal_bold() { return ""; }
+  const char* terminal_underline() { return ""; }
+
+  // You should end each line with this!
+  const char* terminal_reset() { return ""; }
+#else
 	bool terminal_has_color() { return s_terminal_has_color; }
 
 	// Colors
-  const char* terminal_black() { return s_terminal_has_color ? "\033[0;30m" : ""; }
-  const char* terminal_red() { return s_terminal_has_color ? "\033[0;31m" : ""; }
-  const char* terminal_green() { return s_terminal_has_color ? "\033[0;32m" : ""; }
-  const char* terminal_yellow() { return s_terminal_has_color ? "\033[0;33m" : ""; }
-  const char* terminal_blue() { return s_terminal_has_color ? "\033[0;34m" : ""; }
-  const char* terminal_purple() { return s_terminal_has_color ? "\033[0;35m" : ""; }
-  const char* terminal_cyan() { return s_terminal_has_color ? "\033[0;36m" : ""; }
-  const char* terminal_light_gray() { return s_terminal_has_color ? "\033[0;37m" : ""; }
-  const char* terminal_white() { return s_terminal_has_color ? "\033[0;37m" : ""; }
-  const char* terminal_light_red() { return s_terminal_has_color ? "\033[0;91m" : ""; }
-  const char* terminal_dim() { return s_terminal_has_color ? "\033[0;2m" : ""; }
+  const char* terminal_black() { return s_terminal_has_color ? "\e[30m" : ""; }
+  const char* terminal_red() { return s_terminal_has_color ? "\e[31m" : ""; }
+  const char* terminal_green() { return s_terminal_has_color ? "\e[32m" : ""; }
+  const char* terminal_yellow() { return s_terminal_has_color ? "\e[33m" : ""; }
+  const char* terminal_blue() { return s_terminal_has_color ? "\e[34m" : ""; }
+  const char* terminal_purple() { return s_terminal_has_color ? "\e[35m" : ""; }
+  const char* terminal_cyan() { return s_terminal_has_color ? "\e[36m" : ""; }
+  const char* terminal_light_gray() { return s_terminal_has_color ? "\e[37m" : ""; }
+  const char* terminal_white() { return s_terminal_has_color ? "\e[37m" : ""; }
+  const char* terminal_light_red() { return s_terminal_has_color ? "\e[91m" : ""; }
+  const char* terminal_dim() { return s_terminal_has_color ? "\e[2m" : ""; }
 
 	// Formating
-  const char* terminal_bold() { return s_terminal_has_color ? "\033[0;1m" : ""; }
-  const char* terminal_underline() { return s_terminal_has_color ? "\033[0;4m" : ""; }
+  const char* terminal_bold() { return s_terminal_has_color ? "\e[1m" : ""; }
+  const char* terminal_underline() { return s_terminal_has_color ? "\e[4m" : ""; }
 
 	// You should end each line with this!
-  const char* terminal_reset() { return s_terminal_has_color ? "\033[0;0m" : ""; }
+  const char* terminal_reset() { return s_terminal_has_color ? "\e[0m" : ""; }
+#endif
 
 	// ------------------------------------------------------------------------------
 
@@ -449,6 +473,7 @@ namespace loguru
 
 		if (g_stderr_verbosity >= Verbosity_INFO) {
 			if (g_colorlogtostderr && s_terminal_has_color) {
+        SetConsoleTextAttribute(hConsole, 7);
 				fprintf(stderr, "%s%s%s\n", terminal_reset(), terminal_dim(), PREAMBLE_EXPLAIN);
 			}
 			else {
@@ -977,6 +1002,7 @@ namespace loguru
 		if (verbosity <= g_stderr_verbosity) {
 			if (g_colorlogtostderr && s_terminal_has_color) {
 				if (verbosity > Verbosity_WARNING) {
+          SetConsoleTextAttribute(hConsole, 8);
 					fprintf(stderr, "%s%s%s%s%s%s%s%s%s\n",
 						terminal_reset(),
 						terminal_dim(),
@@ -989,6 +1015,20 @@ namespace loguru
 						terminal_reset());
 				}
 				else {
+          switch (verbosity)
+          {
+          case Verbosity_WARNING:
+            SetConsoleTextAttribute(hConsole, 14);
+            break;
+          case Verbosity_ERROR:
+            SetConsoleTextAttribute(hConsole, 12);
+            break;
+          case Verbosity_FATAL:
+            SetConsoleTextAttribute(hConsole, 12);
+            break;
+          default:
+            break;
+          }
 					fprintf(stderr, "%s%s%s%s%s%s%s%s\n",
 						terminal_reset(),
 						terminal_bold(),
@@ -1001,6 +1041,7 @@ namespace loguru
 				}
 			}
 			else {
+        SetConsoleTextAttribute(hConsole, 8);
 				fprintf(stderr, "%s%s%s%s\n",
 					message.preamble, message.indentation, message.prefix, message.message);
 			}
