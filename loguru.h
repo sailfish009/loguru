@@ -403,6 +403,8 @@ namespace loguru
 
 	enum FileMode { Truncate, Append };
 
+  void set_log(int err, bool onoff);
+
 	/*  Will log to a file at the given path.
 		Any logging message with a verbosity lower or equal to
 		the given verbosity will be included.
@@ -1184,8 +1186,9 @@ namespace loguru
 
 // user defined macros
 
-#define LOG_ERROR(...)					LOG_F(ERROR, __VA_ARGS__)
-#define LOG_WARNING(...)  				                  LOG_F(WARNING, __VA_ARGS__)
-#define LOG_INFO(...)					LOG_F(INFO, __VA_ARGS__)
-#define LOG_FATAL(...)					LOG_F(FATAL, __VA_ARGS__)
-#define LOG_FILE(x)					loguru::add_file(x, loguru::Append, loguru::Verbosity_INFO);
+#define LOG_ERROR(...)				   	LOG_F(ERROR, __VA_ARGS__)
+#define LOG_WARNING(...)  		LOG_F(WARNING, __VA_ARGS__)
+#define LOG_INFO(...)					      LOG_F(INFO, __VA_ARGS__)
+#define LOG_FATAL(...)					    LOG_F(FATAL, __VA_ARGS__)
+#define LOG_FILE(x)					          loguru::add_file(x, loguru::Append, loguru::Verbosity_INFO)
+#define SET_LOG(x, y)				        loguru::set_log(x, y)

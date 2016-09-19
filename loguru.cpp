@@ -127,6 +127,11 @@ namespace loguru
 
   bool time_off = true;
 
+  static bool error_on = true;
+  static bool warning_on = true;
+  static bool info_on = true;
+
+
 	static std::recursive_mutex  s_mutex;
 	static Verbosity             s_max_out_verbosity = Verbosity_OFF;
 	static std::string           s_argv0_filename;
@@ -332,6 +337,9 @@ namespace loguru
 				}
 				else if (strcmp(value_str, "FATAL") == 0) {
 					g_stderr_verbosity = Verbosity_FATAL;
+				}
+				else if (strcmp(value_str, "NO") == 0) {
+          g_stderr_verbosity = Verbosity_OFF;
 				}
 				else {
 					char* end = 0;
@@ -612,6 +620,25 @@ namespace loguru
 		free(file_path);
 		return true;
 		}
+
+  void set_log(int err, bool onoff)
+  {
+    switch (err)
+    {
+    case loguru::Verbosity_ERROR:
+      error_on = onoff;
+      break;
+    case loguru::Verbosity_WARNING:
+      warning_on = onoff;
+      break;
+    case loguru::Verbosity_INFO:
+      info_on = onoff;
+      break;
+    default:
+      break;
+    }
+  }
+
 
 	bool add_file(const char* path_in, FileMode mode, Verbosity verbosity)
 	{
@@ -959,12 +986,14 @@ namespace loguru
       snprintf(level_buff, sizeof(level_buff) - 1, " I\t");
     }
     else {
-      snprintf(level_buff, sizeof(level_buff) - 1, "% 4d", verbosity);
+      //snprintf(level_buff, sizeof(level_buff) - 1, "% 4d", verbosity);
     }
 
 #ifdef _MSC_VER
     if (time_off)
     {
+
+
       snprintf(out_buff, out_buff_size, "(%8.3fs) [%s]%20s:%-5u ",
         uptime_sec,
         level_buff,
@@ -1123,6 +1152,24 @@ namespace loguru
 
 	void log(Verbosity verbosity, const char* file, unsigned line, const char* format, ...)
 	{
+    switch (verbosity)
+    {
+    case Verbosity_ERROR:
+      if (!error_on)
+        return;
+      break;
+    case Verbosity_WARNING:
+      if (!warning_on)
+        return;
+      break;
+    case Verbosity_INFO:
+      if (!info_on)
+        return;
+      break;
+    default:
+      break;
+    }
+
 		va_list vlist;
 		va_start(vlist, format);
 		auto buff = vtextprintf(format, vlist);
