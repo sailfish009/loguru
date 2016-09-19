@@ -1185,8 +1185,7 @@ namespace loguru
 // user defined macros
 
 #define LOG_ERROR(...)					LOG_F(ERROR, __VA_ARGS__)
-#define LOG_WARNING(...)  				LOG_F(WARNING, __VA_ARGS__)
+#define LOG_WARNING(...)  				                  LOG_F(WARNING, __VA_ARGS__)
 #define LOG_INFO(...)					LOG_F(INFO, __VA_ARGS__)
 #define LOG_FATAL(...)					LOG_F(FATAL, __VA_ARGS__)
-
-#define LOG_FILE(x)					    loguru::add_file(x, loguru::Append)
+#define LOG_FILE(x)					loguru::add_file(x, loguru::Append, loguru::Verbosity_INFO);
