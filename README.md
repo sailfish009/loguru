@@ -2,7 +2,7 @@
 
 ## At a glance
 
-![Loguru terminal output](images/terminal_colors.png)
+![Loguru terminal output](terminal_colors.png)
 
 ## License
 This software is in the public domain. Where that dedication is not recognized, you are granted a perpetual, irrevocable license to copy and modify this file as you see fit.
@@ -137,7 +137,7 @@ loguru::set_fatal_handler([](const loguru::Message& message){
 
 ``` C
 LOG_INFO("I'm hungry for some %.3f!", 3.14159);
-LOG_ERROR("function() return %d\n", -1); 
+LOG_ERROR("function() return %d\n", -1);
 ```
 
 
