@@ -125,6 +125,8 @@ namespace loguru
 	bool      g_colorlogtostderr = true;
 	unsigned  g_flush_interval_ms = 0;
 
+  bool time_off = true;
+
 	static std::recursive_mutex  s_mutex;
 	static Verbosity             s_max_out_verbosity = Verbosity_OFF;
 	static std::string           s_argv0_filename;
@@ -158,7 +160,7 @@ namespace loguru
 #endif
 	}();
 
-	const auto THREAD_NAME_WIDTH = 16;
+  const auto THREAD_NAME_WIDTH = 2; //16;
 	const auto PREAMBLE_EXPLAIN = "date       time         ( uptime  ) [ thread name/id ]                   file:line     v| ";
 
 #if LOGURU_PTLS_NAMES
@@ -636,7 +638,7 @@ namespace loguru
 		add_callback(path_in, file_log, file, verbosity, file_close, file_flush);
 
 		if (mode == FileMode::Append) {
-			fprintf(file, "\n\n\n\n\n");
+			fprintf(file, "\n");
 		}
 
 		if (!s_arguments.empty())
@@ -647,11 +649,8 @@ namespace loguru
 		{
 			fprintf(file, "Current dir: %s\n", s_current_dir);
 		}
-		fprintf(file, "File verbosity level: %d\n", verbosity);
-		fprintf(file, "%s\n", PREAMBLE_EXPLAIN);
 		fflush(file);
 
-		LOG_F(INFO, "Logging to '%s', mode: '%s', verbosity: %d", path, mode_str, verbosity);
 		return true;
 	}
 
@@ -923,50 +922,63 @@ namespace loguru
 
 	// ------------------------------------------------------------------------
 
-	static void print_preamble(char* out_buff, size_t out_buff_size, Verbosity verbosity, const char* file, unsigned line)
-	{
-		long long ms_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		time_t sec_since_epoch = time_t(ms_since_epoch / 1000);
+  static void print_preamble(char* out_buff, size_t out_buff_size, Verbosity verbosity, const char* file, unsigned line)
+  {
+    long long ms_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    time_t sec_since_epoch = time_t(ms_since_epoch / 1000);
 #ifdef _MSC_VER
-		//tm  *time_info = localtime(&sec_since_epoch);
-		tm  time_info;
-		localtime_s(&time_info,&sec_since_epoch);
+    //tm  *time_info = localtime(&sec_since_epoch);
+    tm  time_info;
+    localtime_s(&time_info, &sec_since_epoch);
 #else
-		tm time_info;
-		localtime_r(&sec_since_epoch, &time_info);
+    tm time_info;
+    localtime_r(&sec_since_epoch, &time_info);
 #endif
 
-		auto uptime_ms = duration_cast<milliseconds>(steady_clock::now() - s_start_time).count();
-		auto uptime_sec = uptime_ms / 1000.0;
+    auto uptime_ms = duration_cast<milliseconds>(steady_clock::now() - s_start_time).count();
+    auto uptime_sec = uptime_ms / 1000.0;
 
-		char thread_name[THREAD_NAME_WIDTH + 1] = { 0 };
-		get_thread_name(thread_name, THREAD_NAME_WIDTH + 1, true);
+    char thread_name[THREAD_NAME_WIDTH + 1] = { 0 };
+    get_thread_name(thread_name, THREAD_NAME_WIDTH + 1, true);
 
-		if (s_strip_file_path) {
-			file = filename(file);
-		}
+    if (s_strip_file_path) {
+      file = filename(file);
+    }
 
-		char level_buff[6];
-		if (verbosity <= Verbosity_FATAL) {
-			snprintf(level_buff, sizeof(level_buff) - 1, "FATL");
-		}
-		else if (verbosity == Verbosity_ERROR) {
-			snprintf(level_buff, sizeof(level_buff) - 1, "ERR");
-		}
-		else if (verbosity == Verbosity_WARNING) {
-			snprintf(level_buff, sizeof(level_buff) - 1, "WARN");
-		}
-		else {
-			snprintf(level_buff, sizeof(level_buff) - 1, "% 4d", verbosity);
-		}
+    char level_buff[6];
+    if (verbosity <= Verbosity_FATAL) {
+      snprintf(level_buff, sizeof(level_buff) - 1, " F\t");
+    }
+    else if (verbosity == Verbosity_ERROR) {
+      snprintf(level_buff, sizeof(level_buff) - 1, " E\t");
+    }
+    else if (verbosity == Verbosity_WARNING) {
+      snprintf(level_buff, sizeof(level_buff) - 1, " W\t");
+    }
+    else if (verbosity == Verbosity_INFO) {
+      snprintf(level_buff, sizeof(level_buff) - 1, " I\t");
+    }
+    else {
+      snprintf(level_buff, sizeof(level_buff) - 1, "% 4d", verbosity);
+    }
 
 #ifdef _MSC_VER
-		snprintf(out_buff, out_buff_size, "%04d-%02d-%02d %02d:%02d:%02d.%03lld (%8.3fs) [%-*s]%23s:%-5u %4s| ",
-			1900 + time_info.tm_year, 1 + time_info.tm_mon, time_info.tm_mday,
-			time_info.tm_hour, time_info.tm_min, time_info.tm_sec, ms_since_epoch % 1000,
-			uptime_sec,
-			THREAD_NAME_WIDTH, thread_name,
-			file, line, level_buff);
+    if (time_off)
+    {
+      snprintf(out_buff, out_buff_size, "(%8.3fs) [%s]%20s:%-5u ",
+        uptime_sec,
+        level_buff,
+        file, line);
+    }
+    else
+    {
+      snprintf(out_buff, out_buff_size, "%04d-%02d-%02d %02d:%02d:%02d.%03lld (%8.3fs) [%-*s]%23s:%-5u %4s| ",
+        1900 + time_info.tm_year, 1 + time_info.tm_mon, time_info.tm_mday,
+        time_info.tm_hour, time_info.tm_min, time_info.tm_sec, ms_since_epoch % 1000,
+        uptime_sec,
+        THREAD_NAME_WIDTH, thread_name,
+        file, line, level_buff);
+    }
 #else
 		snprintf(out_buff, out_buff_size, "%04d-%02d-%02d %02d:%02d:%02d.%03lld (%8.3fs) [%-*s]%23s:%-5u %4s| ",
 			1900 + time_info.tm_year, 1 + time_info.tm_mon, time_info.tm_mday,
