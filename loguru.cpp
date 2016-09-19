@@ -338,9 +338,6 @@ namespace loguru
 				else if (strcmp(value_str, "FATAL") == 0) {
 					g_stderr_verbosity = Verbosity_FATAL;
 				}
-				else if (strcmp(value_str, "NO") == 0) {
-          g_stderr_verbosity = Verbosity_OFF;
-				}
 				else {
 					char* end = 0;
 					g_stderr_verbosity = static_cast<int>(strtol(value_str, &end, 10));
