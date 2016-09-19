@@ -18,9 +18,9 @@ int main()
   LOG_WARNING("warning message 1!");
   LOG_INFO("info message 1!");
 
-  SET_LOG(loguru::Verbosity_ERROR, false);
-  SET_LOG(loguru::Verbosity_WARNING, true);
-  SET_LOG(loguru::Verbosity_INFO, true);
+  set_log(loguru::Verbosity_ERROR, false);
+  set_log(loguru::Verbosity_WARNING, true);
+  set_log(loguru::Verbosity_INFO, true);
 
   LOG_ERROR("error message 2!");
   LOG_WARNING("warning message 2!");

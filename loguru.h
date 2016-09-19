@@ -1191,4 +1191,3 @@ namespace loguru
 #define LOG_INFO(...)					      LOG_F(INFO, __VA_ARGS__)
 #define LOG_FATAL(...)					    LOG_F(FATAL, __VA_ARGS__)
 #define LOG_FILE(x)					          loguru::add_file(x, loguru::Append, loguru::Verbosity_INFO)
-#define SET_LOG(x, y)				        loguru::set_log(x, y)
