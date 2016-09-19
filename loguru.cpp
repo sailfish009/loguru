@@ -1248,7 +1248,11 @@ namespace loguru
 #ifdef __APPLE__
 #define LOGURU_THREAD_LOCAL __thread
 #else
+#if _MSC_VER > 1800
 #define LOGURU_THREAD_LOCAL thread_local
+#else
+#define LOGURU_THREAD_LOCAL
+#endif
 #endif
 	static LOGURU_THREAD_LOCAL ECPtr thread_ec_ptr = nullptr;
 
