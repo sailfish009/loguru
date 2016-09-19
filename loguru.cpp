@@ -1,5 +1,4 @@
-﻿#include "stdafx.h"
-#include "loguru.h"
+﻿#include "loguru.h"
 
 #include <algorithm>
 #include <atomic>
