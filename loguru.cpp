@@ -177,47 +177,25 @@ namespace loguru
 
 	bool terminal_has_color() { return s_terminal_has_color; }
 
-#ifndef _MSC_VER
 	// Colors
-	const char* terminal_black() { return s_terminal_has_color ? "\e[30m" : ""; }
-	const char* terminal_red() { return s_terminal_has_color ? "\e[31m" : ""; }
-	const char* terminal_green() { return s_terminal_has_color ? "\e[32m" : ""; }
-	const char* terminal_yellow() { return s_terminal_has_color ? "\e[33m" : ""; }
-	const char* terminal_blue() { return s_terminal_has_color ? "\e[34m" : ""; }
-	const char* terminal_purple() { return s_terminal_has_color ? "\e[35m" : ""; }
-	const char* terminal_cyan() { return s_terminal_has_color ? "\e[36m" : ""; }
-	const char* terminal_light_gray() { return s_terminal_has_color ? "\e[37m" : ""; }
-	const char* terminal_white() { return s_terminal_has_color ? "\e[37m" : ""; }
-	const char* terminal_light_red() { return s_terminal_has_color ? "\e[91m" : ""; }
-	const char* terminal_dim() { return s_terminal_has_color ? "\e[2m" : ""; }
+  const char* terminal_black() { return s_terminal_has_color ? "\033[0;30m" : ""; }
+  const char* terminal_red() { return s_terminal_has_color ? "\033[0;31m" : ""; }
+  const char* terminal_green() { return s_terminal_has_color ? "\033[0;32m" : ""; }
+  const char* terminal_yellow() { return s_terminal_has_color ? "\033[0;33m" : ""; }
+  const char* terminal_blue() { return s_terminal_has_color ? "\033[0;34m" : ""; }
+  const char* terminal_purple() { return s_terminal_has_color ? "\033[0;35m" : ""; }
+  const char* terminal_cyan() { return s_terminal_has_color ? "\033[0;36m" : ""; }
+  const char* terminal_light_gray() { return s_terminal_has_color ? "\033[0;37m" : ""; }
+  const char* terminal_white() { return s_terminal_has_color ? "\033[0;37m" : ""; }
+  const char* terminal_light_red() { return s_terminal_has_color ? "\033[0;91m" : ""; }
+  const char* terminal_dim() { return s_terminal_has_color ? "\033[0;2m" : ""; }
 
 	// Formating
-	const char* terminal_bold() { return s_terminal_has_color ? "\e[1m" : ""; }
-	const char* terminal_underline() { return s_terminal_has_color ? "\e[4m" : ""; }
+  const char* terminal_bold() { return s_terminal_has_color ? "\033[0;1m" : ""; }
+  const char* terminal_underline() { return s_terminal_has_color ? "\033[0;4m" : ""; }
 
 	// You should end each line with this!
-	const char* terminal_reset() { return s_terminal_has_color ? "\e[0m" : ""; }
-
-#else
-	const char* terminal_black() { return ""; }
-	const char* terminal_red() { return ""; }
-	const char* terminal_green() { return ""; }
-	const char* terminal_yellow() { return ""; }
-	const char* terminal_blue() { return ""; }
-	const char* terminal_purple() { return ""; }
-	const char* terminal_cyan() { return ""; }
-	const char* terminal_light_gray() { return ""; }
-	const char* terminal_white() { return ""; }
-	const char* terminal_light_red() { return ""; }
-	const char* terminal_dim() { return ""; }
-
-	// Formating
-	const char* terminal_bold() { return ""; }
-	const char* terminal_underline() { return ""; }
-
-	// You should end each line with this!
-	const char* terminal_reset() { return ""; }
-#endif
+  const char* terminal_reset() { return s_terminal_has_color ? "\033[0;0m" : ""; }
 
 	// ------------------------------------------------------------------------------
 
@@ -504,7 +482,7 @@ namespace loguru
 		auto now = system_clock::now();
 		long long ms_since_epoch = duration_cast<milliseconds>(now.time_since_epoch()).count();
 		time_t sec_since_epoch = time_t(ms_since_epoch / 1000);
-#ifdef _MSC_VER
+#if  _MSC_VER
 		//tm* time_info = localtime(&sec_since_epoch);
 		tm time_info;
 		localtime_s(&time_info, &sec_since_epoch);
