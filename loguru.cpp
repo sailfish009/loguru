@@ -631,6 +631,12 @@ namespace loguru
     case loguru::Verbosity_INFO:
       info_on = onoff;
       break;
+    case loguru::Verbosity_OFF:
+      if (onoff == true)
+        g_stderr_verbosity = err;
+      else
+        g_stderr_verbosity = Verbosity_0;
+      break;
     default:
       break;
     }
