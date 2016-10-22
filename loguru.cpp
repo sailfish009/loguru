@@ -130,6 +130,7 @@ namespace loguru
   static bool error_on = true;
   static bool warning_on = true;
   static bool info_on = true;
+  static bool name_on = true;
 
 
 	static std::recursive_mutex  s_mutex;
@@ -631,6 +632,9 @@ namespace loguru
     case loguru::Verbosity_INFO:
       info_on = onoff;
       break;
+    case loguru::Verbosity_NAME:
+      name_on = onoff;
+      break;
     case loguru::Verbosity_OFF:
       if (onoff == true)
         g_stderr_verbosity = err;
@@ -952,6 +956,7 @@ namespace loguru
 
 	// ------------------------------------------------------------------------
 
+  // modify
   static void print_preamble(char* out_buff, size_t out_buff_size, Verbosity verbosity, const char* file, unsigned line)
   {
     long long ms_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -995,12 +1000,15 @@ namespace loguru
 #ifdef _MSC_VER
     if (time_off)
     {
-
-
-      snprintf(out_buff, out_buff_size, "(%8.3fs) [%s]%20s:%-5u ",
-        uptime_sec,
-        level_buff,
-        file, line);
+      if (name_on == true)
+        snprintf(out_buff, out_buff_size, "(%8.3fs) [%s]%20s:%-5u ",
+          uptime_sec,
+          level_buff,
+          file, line);
+      else
+        snprintf(out_buff, out_buff_size, "(%8.3fs) [%s] ",
+          uptime_sec,
+          level_buff);
     }
     else
     {

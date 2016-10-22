@@ -283,6 +283,8 @@ namespace loguru
 		// You may use Verbosity_OFF on g_stderr_verbosity, but for nothing else!
 		Verbosity_OFF     = -9, // Never do LOG_F(OFF)
 
+    Verbosity_NAME = -4, // Hide File name
+
 		// Prefer to use ABORT_F or ABORT_S over LOG_F(FATAL) or LOG_S(FATAL).
 		Verbosity_FATAL   = -3,
 		Verbosity_ERROR   = -2,
