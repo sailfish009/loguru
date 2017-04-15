@@ -545,12 +545,24 @@ namespace loguru
 		return s_current_dir;
 	}
 
-	const char* home_dir()
+	BOOL home_dir(char (&result)[1024])
 	{
 #ifdef _WIN32
-		auto user_profile = getenv("USERPROFILE");
-		CHECK_F(user_profile != nullptr, "Missing USERPROFILE");
-		return user_profile;
+        memset(result, 0, 1024);
+        char * buf = nullptr;
+        size_t  sz = 0;
+        if (_dupenv_s(&buf, &sz, "USERPROFILE") == 0 && buf != nullptr)
+        {
+          if (sz < 1024)
+          {
+            memcpy(result, buf, sz);
+            free(buf);
+            return TRUE;
+          }
+          free(buf);
+        }
+        assert(FALSE);
+        return FALSE;
 #else // _WIN32
 		auto home = getenv("HOME");
 		CHECK_F(home != nullptr, "Missing HOME");
@@ -561,7 +573,9 @@ namespace loguru
 	void suggest_log_path(const char* prefix, char* buff, unsigned buff_size)
 	{
 		if (prefix[0] == '~') {
-			snprintf(buff, buff_size - 1, "%s%s", home_dir(), prefix + 1);
+      char home_str[1024] = { 0 };
+      home_dir(home_str);
+      snprintf(buff, buff_size - 1, "%s%s", home_str, prefix + 1);
 		}
 		else {
 			snprintf(buff, buff_size - 1, "%s", prefix);
@@ -651,7 +665,9 @@ namespace loguru
 	{
 		char path[1024];
 		if (path_in[0] == '~') {
-			snprintf(path, sizeof(path) - 1, "%s%s", home_dir(), path_in + 1);
+            char home_str[1024] = { 0 };
+            home_dir(home_str);
+			snprintf(path, sizeof(path) - 1, "%s%s", home_str, path_in + 1);
 		}
 		else {
 			snprintf(path, sizeof(path) - 1, "%s", path_in);
