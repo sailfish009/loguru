@@ -1214,7 +1214,7 @@ namespace loguru
 		va_end(vlist);
 	}
 
-	void flush()
+	static void flush()
 	{
 		std::lock_guard<std::recursive_mutex> lock(s_mutex);
 		fflush(stderr);
