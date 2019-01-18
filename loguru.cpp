@@ -396,25 +396,28 @@ namespace loguru
 
 	static void escape(std::string& out, const std::string& str)
 	{
-		for (char c : str) {
-			/**/ if (c == '\a') { out += "\\a"; }
-			else if (c == '\b') { out += "\\b"; }
-			else if (c == '\f') { out += "\\f"; }
-			else if (c == '\n') { out += "\\n"; }
-			else if (c == '\r') { out += "\\r"; }
-			else if (c == '\t') { out += "\\t"; }
-			else if (c == '\v') { out += "\\v"; }
-			else if (c == '\\') { out += "\\\\"; }
-			else if (c == '\'') { out += "\\\'"; }
-			else if (c == '\"') { out += "\\\""; }
-			else if (c == ' ') { out += "\\ "; }
-			else if (0 <= c && c < 0x20) { // ASCI control character:
-										   // else if (c < 0x20 || c != (c & 127)) { // ASCII control character or UTF-8:
-				out += "\\x";
-				write_hex_byte(out, static_cast<uint8_t>(c));
-			}
-			else { out += c; }
-		}
+    for (char c : str)
+    {
+      switch (c)
+      {
+      case '\a': out += "\\a";  break;
+      case '\b': out += "\\b";  break;
+      case '\f': out += "\\f";  break;
+      case '\n': out += "\\n";  break;
+      case '\r': out += "\\r";  break;
+      case '\t': out += "\\t";  break;
+      case '\v': out += "\\v";  break;
+      case '\\': out += "\\\\"; break;
+      case '\'': out += "\\\'"; break;
+      case '\"': out += "\\\""; break;
+      case ' ': out += "\\ ";   break;
+      case  0: case  1: case  2: case  3: case  4: case  5: case  6: 
+                                          case 14: case 15: case 16: case 17: case 18: case 19:
+      case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29:
+      case 30: case 31: { out += "\\x"; write_hex_byte(out, static_cast<uint8_t>(c)); } break;
+      default:  out += c; break;
+      }
+    }
 	}
 
 	Text errno_as_text()
@@ -1469,20 +1472,23 @@ namespace loguru
 			write_hex_digit((n >> 0u) & 0x0f);
 		};
 
-		if (c == '\\') { str += "\\\\"; }
-		else if (c == '\"') { str += "\\\""; }
-		else if (c == '\'') { str += "\\\'"; }
-		else if (c == '\0') { str += "\\0"; }
-		else if (c == '\b') { str += "\\b"; }
-		else if (c == '\f') { str += "\\f"; }
-		else if (c == '\n') { str += "\\n"; }
-		else if (c == '\r') { str += "\\r"; }
-		else if (c == '\t') { str += "\\t"; }
-		else if (0 <= c && c < 0x20) {
-			str += "\\u";
-			write_hex_16(static_cast<uint16_t>(c));
-		}
-		else { str += c; }
+    switch (c)
+    {
+    case '\\': str += "\\\\"; break;
+    case '\"': str += "\\\""; break;
+    case '\'': str += "\\\'"; break;
+    case '\0': str += "\\0";  break;
+    case '\b': str += "\\b";  break;
+    case '\f': str += "\\f";  break;
+    case '\n': str += "\\n";  break;
+    case '\r': str += "\\r";  break;
+    case '\t': str += "\\t";  break;
+             case  1: case  2: case  3: case  4: case  5: case  6: case  7: 
+             case 11:                   case 14: case 15: case 16: case 17: case 18: case 19:
+    case 20: case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29:
+    case 30: case 31: { str += "\\u"; write_hex_16(static_cast<uint16_t>(c)); } break;
+    default:  str += c; break;
+    }
 
 		str += "'";
 
