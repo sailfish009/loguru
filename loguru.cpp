@@ -18,7 +18,8 @@
 #else
 #include <signal.h>
 #include <sys/stat.h> // mkdir
-#include <unistd.h>   // STDERR_FILENO
+// #include <unistd.h>   // STDERR_FILENO
+#define STDERR_FILENO 2
 #endif
 
 #ifdef __linux__
@@ -43,6 +44,34 @@
 #else
 #define LOGURU_PTHREADS    1
 #define LOGURU_STACKTRACES 1
+#endif
+
+#ifdef _WIN32
+#include <Windows.h>
+#include <direct.h>
+#ifdef __BORLANDC__
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <tchar.h>
+#define va_copy(dest, src) (dest = src)
+char * _strdup (const char *s) 
+{
+  char *d = (char *)malloc (strlen (s) + 1);   // Space for length plus nul
+  if (d == NULL) return NULL;          // No memory
+  strcpy (d,s);                        // Copy the characters
+  return d;                            // Return the new string
+}
+int _vscprintf (const char * format, va_list pargs) 
+{ 
+  int retval; 
+  va_list argcopy; 
+  va_copy(argcopy, pargs); 
+  retval = vsnprintf(NULL, 0, format, argcopy); 
+  va_end(argcopy); 
+  return retval; 
+}
+#endif
 #endif
 
 #if LOGURU_STACKTRACES
@@ -92,7 +121,11 @@ namespace loguru
 		int count = -1;
 
 		if (size != 0)
+#ifdef _MSC_VER
 			count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
+#else
+			count = _vsnprintf(outBuf, size, format, ap);
+#endif
 		if (count == -1)
 			count = _vscprintf(format, ap);
 
@@ -182,7 +215,6 @@ namespace loguru
 	// ------------------------------------------------------------------------------
 	// Colors
 #if _MSC_VER
-#include "Windows.h"
   HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
   // Colors
@@ -269,7 +301,12 @@ namespace loguru
 		return Text(buff);
 #else
 		char* buff = nullptr;
+#if _WIN32
+		int result = vsprintf(buff, format, vlist);
+#else
 		int result = vasprintf(&buff, format, vlist);
+#endif
+
 		CHECK_F(result >= 0, "Bad string format: '%s'", format);
 		return Text(buff);
 #endif
@@ -428,7 +465,7 @@ namespace loguru
 #elif __APPLE__
 		strerror_r(errno, buff, sizeof(buff));
 		return Text(strdup(buff));
-#elif WIN32
+#elif _WIN32
 		//_strerror_s(buff, sizeof(buff));
 		strerror_s(buff, sizeof(buff), errno);
 		return Text(_strdup(buff));
@@ -484,7 +521,9 @@ namespace loguru
 
 		if (g_stderr_verbosity >= Verbosity_INFO) {
 			if (g_colorlogtostderr && s_terminal_has_color) {
+#if _MSC_VER
         SetConsoleTextAttribute(hConsole, 7);
+#endif
 				fprintf(stderr, "%s%s%s\n", terminal_reset(), terminal_dim(), PREAMBLE_EXPLAIN);
 			}
 			else {
@@ -526,7 +565,11 @@ namespace loguru
 			time_info.tm_hour, time_info.tm_min, time_info.tm_sec, ms_since_epoch % 1000);
 #else
 		tm time_info;
+#ifdef __BORLANDC__
+		localtime_s(&sec_since_epoch, &time_info);
+#else
 		localtime_r(&sec_since_epoch, &time_info);
+#endif
 		snprintf(buff, buff_size, "%04d%02d%02d_%02d%02d%02d.%03lld",
 			1900 + time_info.tm_year, 1 + time_info.tm_mon, time_info.tm_mday,
 			time_info.tm_hour, time_info.tm_min, time_info.tm_sec, ms_since_epoch % 1000);
@@ -551,21 +594,30 @@ namespace loguru
 	BOOL home_dir(char (&result)[1024])
 	{
 #ifdef _WIN32
-        memset(result, 0, 1024);
-        char * buf = nullptr;
-        size_t  sz = 0;
-        if (_dupenv_s(&buf, &sz, "USERPROFILE") == 0 && buf != nullptr)
-        {
-          if (sz < 1024)
-          {
-            memcpy(result, buf, sz);
-            free(buf);
-            return TRUE;
-          }
-          free(buf);
-        }
-        assert(FALSE);
-        return FALSE;
+#ifdef _MSC_VER
+    memset(result, 0, 1024);
+    char * buf = nullptr;
+    size_t  sz = 0;
+    if (_dupenv_s(&buf, &sz, "USERPROFILE") == 0 && buf != nullptr)
+    {
+      if (sz < 1024)
+      {
+        memcpy(result, buf, sz);
+        free(buf);
+        return TRUE;
+      }
+      free(buf);
+    }
+    assert(FALSE);
+    return FALSE;
+#elif __BORLANDC__
+    memset(result, 0, 1024);
+		auto ptr = getenv("USERPROFILE");
+		CHECK_F(ptr != nullptr, "Missing USERPROFILE");
+    memcpy(result, ptr, strlen(ptr)+1);
+    return TRUE;
+#endif
+
 #else // _WIN32
 		auto home = getenv("HOME");
 		CHECK_F(home != nullptr, "Missing HOME");
@@ -615,7 +667,13 @@ namespace loguru
 #ifdef _MSC_VER
 			if (_mkdir(file_path) == -1) {
 #else
+
+#ifdef _WIN32
+			if (_mkdir(file_path) == -1) {
+#else
 			if (mkdir(file_path, 0755) == -1) {
+#endif
+
 #endif
 				if (errno != EEXIST) {
 					LOG_F(ERROR, "Failed to create directory '%s'", file_path);
@@ -986,7 +1044,11 @@ namespace loguru
     localtime_s(&time_info, &sec_since_epoch);
 #else
     tm time_info;
+#ifdef __BORLANDC__
+    localtime_s(&sec_since_epoch, &time_info);
+#else
     localtime_r(&sec_since_epoch, &time_info);
+#endif
 #endif
 
     auto uptime_ms = duration_cast<milliseconds>(steady_clock::now() - s_start_time).count();
@@ -1073,7 +1135,9 @@ namespace loguru
 		if (verbosity <= g_stderr_verbosity) {
 			if (g_colorlogtostderr && s_terminal_has_color) {
 				if (verbosity > Verbosity_WARNING) {
+#if _MSC_VER
           SetConsoleTextAttribute(hConsole, 8);
+#endif
 					fprintf(stderr, "%s%s%s%s%s%s%s%s%s\n",
 						terminal_reset(),
 						terminal_dim(),
@@ -1089,13 +1153,19 @@ namespace loguru
           switch (verbosity)
           {
           case Verbosity_WARNING:
+#if _MSC_VER
             SetConsoleTextAttribute(hConsole, 14);
+#endif
             break;
           case Verbosity_ERROR:
+#if _MSC_VER
             SetConsoleTextAttribute(hConsole, 12);
+#endif
             break;
           case Verbosity_FATAL:
+#if _MSC_VER
             SetConsoleTextAttribute(hConsole, 12);
+#endif
             break;
           default:
             break;
@@ -1112,7 +1182,9 @@ namespace loguru
 				}
 			}
 			else {
+#if _MSC_VER
         SetConsoleTextAttribute(hConsole, 8);
+#endif
 				fprintf(stderr, "%s%s%s%s\n",
 					message.preamble, message.indentation, message.prefix, message.message);
 			}
