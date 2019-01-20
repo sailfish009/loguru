@@ -4,6 +4,18 @@
 
 ![Loguru terminal output](terminal.png)
 
+## Installation
+[DLL - Shared library]
+cp config/CMakeLists_SHARED.txt CMakeLists.txt
+[LIB - Static library]
+cp config/CMakeLists_STATIC.txt CMakeLists.txt
+
+mkdir build
+run cmake gui
+Configure -> Generate
+cd build // and compile and run // vc++, mingw gcc, c++ builder etc..
+
+
 ## License
 This software is in the public domain. Where that dedication is not recognized, you are granted a perpetual, irrevocable license to copy and modify this file as you see fit.
 
