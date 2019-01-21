@@ -71,6 +71,26 @@ int _vscprintf (const char * format, va_list pargs)
   va_end(argcopy); 
   return retval; 
 }
+int _vscprintf_so(const char * format, va_list pargs) 
+{
+  int retval;
+  va_list argcopy;
+  va_copy(argcopy, pargs);
+  retval = vsnprintf(NULL, 0, format, argcopy);
+  va_end(argcopy);
+  return retval;
+}
+int vasprintf(char **strp, const char *fmt, va_list ap) 
+{
+  int len = _vscprintf_so(fmt, ap);
+  if (len == -1) return -1;
+  char *str = (char *)malloc((size_t)len + 1);
+  if (!str) return -1;
+  int r = vsnprintf(str, len + 1, fmt, ap); /* "secure" version of vsprintf */
+  if (r == -1) return free(str), -1;
+  *strp = str;
+  return r;
+}
 #endif
 #endif
 
@@ -301,12 +321,7 @@ namespace loguru
 		return Text(buff);
 #else
 		char* buff = nullptr;
-#if _WIN32
-		int result = vsprintf(buff, format, vlist);
-#else
 		int result = vasprintf(&buff, format, vlist);
-#endif
-
 		CHECK_F(result >= 0, "Bad string format: '%s'", format);
 		return Text(buff);
 #endif

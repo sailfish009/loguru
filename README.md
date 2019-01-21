@@ -6,14 +6,27 @@
 
 ## Installation
 [DLL - Shared library]
+
 cp config/CMakeLists_SHARED.txt CMakeLists.txt
+
 [LIB - Static library]
+
 cp config/CMakeLists_STATIC.txt CMakeLists.txt
 
 mkdir build
+
 run cmake gui
+
 Configure -> Generate
+
 cd build // and compile and run // vc++, mingw gcc, c++ builder etc..
+
+    int main()
+    {
+      LOG_FILE("test.log");
+      LOG_INFO("hello, world!");
+      return 0;
+    }
 
 
 ## License
