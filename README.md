@@ -21,6 +21,7 @@ Configure -> Generate
 
 cd build // and compile and run // vc++, mingw gcc, c++ builder etc..
 
+    #include "loguru.h"
     int main()
     {
       LOG_FILE("test.log");
