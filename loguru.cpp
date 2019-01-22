@@ -49,6 +49,8 @@
 #ifdef _WIN32
 #include <Windows.h>
 #include <direct.h>
+#include <share.h>
+#define _SH_DENYWR 32
 #ifdef __BORLANDC__
 #include <stdlib.h>
 #include <stdio.h>
@@ -753,10 +755,14 @@ namespace loguru
 			LOG_F(ERROR, "Failed to create directories to '%s'", path);
 		}
 
-		const char* mode_str = (mode == FileMode::Truncate ? "w" : "a");
+		const char* mode_str = (mode == FileMode::Truncate ? "w" : "a+");
 		//auto file = fopen(path, mode_str);
 		FILE * file = nullptr;
+#ifdef _WIN32
+		file = _fsopen(path, mode_str, _SH_DENYWR);
+#else
 		fopen_s(&file, path, mode_str);
+#endif
 		if (!file) {
 			LOG_F(ERROR, "Failed to open '%s'", path);
 			return false;
