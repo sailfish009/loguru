@@ -50,7 +50,9 @@
 #include <Windows.h>
 #include <direct.h>
 #include <share.h>
+#ifndef _SH_DENYWR
 #define _SH_DENYWR 32
+#endif 
 #ifdef __BORLANDC__
 #include <stdlib.h>
 #include <stdio.h>
